@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<title>特定の場所を中心にして該当場所と円を表示</title>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		var map;
+		var ftLayer = null;
+		var	fID = 1488591;	// 緯度経度が入ったテーブルID
+		var circle = null;
+		window.addEventListener("load", function(){
+			map = new google.maps.Map(document.getElementById("gmap"));
+			map.setOptions({
+				zoom : 14,
+				center : new google.maps.LatLng(35.681382, 139.766084),
+				mapTypeId : google.maps.MapTypeId.ROADMAP
+			});
+			// イベント割り当て
+			document.getElementById("drawMarker").addEventListener("click", function(){
+				var centerLat = 35.681382;	// 中心の緯度
+				var centerLon = 139.766084;	// 中心の経度
+				if (ftLayer){ ftLayer.setMap(null); }	// Fusion Tablesレイヤーを削除
+				// クエリーを発行し結果を地図に表示
+				var r = document.getElementById("radius").value;
+				var qstr = "SELECT * FROM "+fID+" WHERE ST_INTERSECTS(coords, CIRCLE(LATLNG("+centerLat+", "+centerLon+"), "+r+"))";
+				ftLayer = new google.maps.FusionTablesLayer(fID);
+				ftLayer.setQuery(qstr);
+				ftLayer.setMap(map);
+				// 円を描く
+				if (circle){ circle.setMap(null); }	// 円を削除
+				circle = new google.maps.Circle({
+					map : map,	// 表示先のマップオブジェクト
+					center : new google.maps.LatLng(centerLat, centerLon),	// 中心の緯度経度
+					radius : parseInt(r),	// 半径
+					strokeWeight : 1,	// 線の太さ
+					strokeColor : "#ff0000",	// 赤色
+					fillColor : "#ffff00",	// 黄色
+					strokeOpacity : 0.5,	// 線の不透明度
+					fillOpacity : 0.4,	// 塗りの不透明度
+					clickable : false	//　クリックできるかどうか（false=クリックできない）
+				});
+			}, false);
+		}, false);
+	</script>
+	</head>
+	<body>
+		<div id="gmap" style="width: 500px; height: 400px"></div>
+		<form>
+			半径：<input type="text" value="1000" id="radius" size="8">
+			<input type="button" id="drawMarker" value="表示">
+		</form>
+	</body>
+</html>

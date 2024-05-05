@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+function initialize(){
+	map = new google.maps.Map(
+				document.getElementById("map"),{
+					zoom : 14,
+					center : new google.maps.LatLng(35.68916, 139.70083),
+					mapTypeControlOptions : {
+					       style : google.maps.MapTypeControlStyle.DROPDOWN_MENU
+					},
+					navigationControlOptions : {
+					       style : google.maps.NavigationControlStyle.SMALL
+					},
+					scaleControl:true,
+					scaleControlOptions : {
+					       style : google.maps.ScaleControlStyle.DEFAULT
+					},
+					mapTypeId : google.maps.MapTypeId.ROADMAP
+				}
+	);
+//高さを調節する
+	var hh = ($(document).height() -100);
+	$("#map").css("height",hh);
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+<style type="text/css" />
+div#map {width: device-width;}
+</style>
+<title>maps on firstpage</title>
+</head>
+<body>
+<div data-role="page" id="maps">
+	<div data-role="header">
+	<h1>map_Header</h1>
+	</div>
+	<div data-role="content">
+	<div id="map" class="ui-shadow"></div> 
+	</div>
+</div>
+</body>
+</html>

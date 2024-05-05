@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&v=3.4"></script>
+	<script type="text/javascript">
+		function MyInfoWnd(){
+			/*
+			 * (1)DIVを作る
+			 */
+			//全体のDivを入れるコンテナ
+			this.container_ = document.createElement("div");
+			this.container_.style.backgroundImage = "url('fukidashi.png')";
+			this.container_.style.backgroundRepeat = "no-repeat";
+			this.container_.style.width = "280px";
+			this.container_.style.height = "130px";
+			this.container_.style.position = "absolute";
+			
+			//クローズボタン
+			this.closeBtn_ = document.createElement("div");
+			this.closeBtn_.style.width = "17px";
+			this.closeBtn_.style.height = "17px";
+			this.closeBtn_.style.position = "absolute";
+			this.closeBtn_.style.left = "245px";
+			this.closeBtn_.style.top = "65px";
+			this.closeBtn_.style.cursor = "pointer";
+			this.container_.appendChild(this.closeBtn_);
+			
+			//内容
+			this.contents_ = document.createElement("div");
+			this.contents_.style.position = "absolute";
+			this.contents_.style.width = "217px";
+			this.contents_.style.height = "46px";
+			this.contents_.style.position = "absolute";
+			this.contents_.style.left = "21px";
+			this.contents_.style.top = "71px";
+			this.container_.appendChild(this.contents_);
+			
+			//クローズボタンがクリックされたら、地図から削除
+			var that = this;
+			google.maps.event.addDomListener(this.closeBtn_, "click", function(){
+				that.setMap(null);
+			});
+		}
+		MyInfoWnd.prototype = new google.maps.OverlayView();
+		MyInfoWnd.prototype.onAdd = function() {
+			/*
+			 * (2)floatPaneに追加
+			 */
+			this.layer_ = (this.getPanes()).floatPane;
+			this.layer_.appendChild(this.container_);
+		};
+		MyInfoWnd.prototype.draw = function() {
+			/*
+			 * (3)地図に描画
+			 */
+			var pixel = this.getProjection().fromLatLngToDivPixel(this.position);
+			
+			this.container_.style.left = pixel.x + "px";
+			this.container_.style.top = pixel.y + "px";
+		};
+		MyInfoWnd.prototype.onRemove = function() {
+			/*
+			 * (4)floatPaneからdivを削除
+			 */
+			if (this.layer_ != null) {
+				this.layer_.removeChild(this.container_);
+				this.layer_ = null;
+			}
+		};
+		MyInfoWnd.prototype.setContent = function(html) {
+			this.contents_.innerHTML = html;
+		};
+		MyInfoWnd.prototype.setPosition = function(position) {
+			this.set("position", position);
+		};
+		MyInfoWnd.prototype.open = function(map_or_marker) {
+			if ("position" in map_or_marker) {
+				this.setPosition(map_or_marker.getPosition());
+				this.setMap(map_or_marker.getMap());
+			} else {
+				this.setMap(map);
+			}
+		};
+		MyInfoWnd.prototype.close = function() {
+			this.setMap(null);
+		};
+		
+		function initialize() {
+			var latlng = new google.maps.LatLng(35.661382, 139.766084);
+			var mapOpts = {
+				zoom: 5,
+				center: latlng,
+				mapTypeId:  google.maps.MapTypeId.ROADMAP
+			};
+			var mapDiv = document.getElementById("map_canvas");
+			var mapCanvas = new google.maps.Map(mapDiv, mapOpts);
+			
+			var marker = new google.maps.Marker({
+				position : latlng,
+				map : mapCanvas
+			});
+			google.maps.event.addListener(marker, "click", function(){
+				/*
+				 * クリックされたら吹き出しを表示する
+				 */
+				var myInfoWnd = new MyInfoWnd();
+				myInfoWnd.setContent("ここは日本です");
+				myInfoWnd.open(marker);
+			});
+		}
+		window.onload = initialize;
+	</script>
+</head>
+<body>
+	<div id="map_canvas"></div>
+</body>
+</html>

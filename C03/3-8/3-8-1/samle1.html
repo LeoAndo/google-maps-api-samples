@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Sample</title>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<style>
+#gmap{position:absolute;width:400px;height:380px;}
+#stv{position:absolute;width:280px;height:380px;left:410px;}
+#staticstv{position:absolute;width:240px;height:240px;left:690px;}
+#btn{position:absolute;top:390px;}
+#url{position:absolute;top:400px;}
+#geobtn {position:absolute;left:5px;top:120px;}
+</style>
+</head>
+<body>
+<div id="gmap"></div> 
+<div id="stv"></div> 
+<div id="staticstv"></div> 
+<div id="url"></div> 
+<div id="geobtn"></div> 
+<form>
+<input type="button" id=btn value="StaticStreetView生成" onclick="makeSTV()">
+</form>
+<script type="text/javascript">
+var map = new google.maps.Map(
+	document.getElementById("gmap"),{
+		zoom : 16,
+		center : new google.maps.LatLng(35.62837,139.74124),
+		mapTypeId : google.maps.MapTypeId.ROADMAP,
+		streetViewControl : true
+	}
+);
+// ストリートビュー表示
+var svp = new google.maps.StreetViewPanorama(
+	document.getElementById("stv"), {
+		position : new google.maps.LatLng(35.62837,139.74124)
+	});
+map.setStreetView(svp);
+// ストリートビューの静止画を生成する
+function makeSTV(){
+	var pov = svp.getPov();
+	var hd = pov.heading;	// 方角
+	var pt = pov.pitch;	// 見上げる角度
+	var lat = svp.position.lat();
+	var lng = svp.position.lng();
+	var url = "http://maps.googleapis.com/maps/api/streetview?size=240x240&";
+	var img = url+"location="+lat+","+lng+"&fov=90&heading="+hd+"&pitch="+pt+"&sensor=false";
+	alert("緯度:"+lat+"、経度:"+lng+"\r\n 方角："+hd+"、角度："+pt+"\r\nURL:"+img);
+	document.getElementById("staticstv").innerHTML="<img src="+img+">";
+	document.getElementById("url").innerHTML="<a href="+img+" target='_blank'>"+img+"</a>";
+}
+function prmpt(){
+	addressJump(prompt("旅行するならどこ行きたい？","yokohama"));
+}
+//add_geo
+document.getElementById("geobtn").innerHTML = "<img src='geo.gif' id='geoForm'>";
+document.getElementById("geoForm").addEventListener("click", prmpt,true);
+//add_geo
+function addressJump(adrs){
+	var gc = new google.maps.Geocoder();
+	gc.geocode({ address : adrs }, function(results, status){
+		if (status == google.maps.GeocoderStatus.OK) {
+			map.setCenter(results[0].geometry.location);
+		}
+	});
+}
+</script>
+</body>
+</html>

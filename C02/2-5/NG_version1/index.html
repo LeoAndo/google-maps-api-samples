@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Google Maps Sample</title>
+		<link rel="stylesheet" href="css/main.css" type="text/css" media="all">
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	</head>
+	<body>
+	<div id="gmap"></div>
+	<script type="text/javascript">
+		var map = new google.maps.Map(
+			document.getElementById("gmap"),{
+				zoom : 7,
+				center : new google.maps.LatLng(35.689, 139.7),
+				mapTypeId : google.maps.MapTypeId.ROADMAP
+			}
+		);
+	</script>
+</body>
+</html>

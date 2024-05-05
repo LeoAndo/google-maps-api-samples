@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>4-2-5_Sample</title>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true&libraries=places"></script>
+<script type="text/javascript">
+var markersArray= new Array();
+var map;
+var infowindow;
+var currentInfoWindow = null;
+var ll= new Array();
+
+function initialize(){
+	document.getElementById("gmap").style.width="100%";
+	document.getElementById("gmap").style.height="100%";
+
+	map = new google.maps.Map(
+				document.getElementById("gmap"),{
+					zoom : 14,
+					center : new google.maps.LatLng(35.68916, 139.70083),
+					mapTypeControlOptions : {
+					       style : google.maps.MapTypeControlStyle.DROPDOWN_MENU
+					},
+					navigationControlOptions : {
+					       style : google.maps.NavigationControlStyle.SMALL
+					},
+					scaleControl:true,
+					scaleControlOptions : {
+					       style : google.maps.ScaleControlStyle.DEFAULT
+					},
+					mapTypeId : google.maps.MapTypeId.ROADMAP
+				}
+	);
+	if(navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(function(pos){
+			var lat = pos.coords.latitude;
+			var lng = pos.coords.longitude;
+			var currentPos = new google.maps.LatLng(lat, lng);
+			map.setCenter(currentPos);
+		},
+		function(error){},
+		{enableHighAccuracy:false,timeout:8000,maximumAge:0}
+		);
+	}
+	document.getElementById("getbtn").innerHTML = "<img src='http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=店|88ff88|000000' id='getData'>";
+	document.getElementById("getData").addEventListener("click", getData,true);
+//add_memo
+	document.getElementById("textareas").innerHTML = "<input type=text id=memoTxt>";
+	document.getElementById("textareas").innerHTML += "<input type=hidden id='pid'>";
+	document.getElementById("textareas").innerHTML += "<input type=button onClick='createMemo();' value='Save'>";
+	document.getElementById("textareas").style.visibility = "hidden";
+//add_memo
+	document.getElementById("geobtn").innerHTML = "<img src='http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=移|ffff88|000000' id='geoForm'>";
+	document.getElementById("geoForm").addEventListener("click", prmpt,true);
+	setTimeout(scrollTo, 100, 0, 1);
+}
+function prmpt(){
+	addressJump(prompt("旅行するならどこ行きたい？","yokohama"));
+}
+function getData(){
+	clearOverlays();
+	var request = {
+		location: map.getCenter(),
+		radius: 2000,
+		types: ['store']
+	};
+	var service = new google.maps.places.PlacesService(map);
+	service.search(request, callback);
+}
+
+function callback(results, status) {
+	if (status == google.maps.places.PlacesServiceStatus.OK) {
+		for (var i = 0; i < results.length; i++) {
+			createMarker(results[i]);
+		}
+	}
+}
+
+function createMarker(place) {
+	var item=localStorage.getItem(place.id);
+	if(item == null){
+		anim = google.maps.Animation.DROP
+	}else{
+		anim = google.maps.Animation.BOUNCE
+	}
+
+	var placeLoc = place.geometry.location;
+	var marker = new google.maps.Marker({
+		map: map,
+		draggable:true,
+		title:place.name,
+		animation: anim,
+		position: place.geometry.location
+	});
+
+	google.maps.event.addListener(marker, 'click', function() {
+		clsBox();
+		var request = {
+		  reference: place.reference
+		};
+		var more_place = JSON.parse(sessionStorage.getItem(place.id));
+		if(more_place == null){
+			alert("net");
+			service = new google.maps.places.PlacesService(map);
+			service.getDetails(request, function(more_place,status){
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+					sessionStorage.setItem(place.id,JSON.stringify(more_place));
+					lat = more_place.geometry.location.lat();
+					lng = more_place.geometry.location.lng();
+					sessionStorage.setItem(ll[more_place.id],lat+","+lng);
+					moreInfo(marker,more_place);
+				}
+			});
+		}else{
+			alert("session");
+			moreInfo(marker,more_place);
+		}
+	});
+	markersArray.push(marker);
+}
+
+function moreInfo(marker,more_place){
+	html="";
+	if(more_place.icon != ''){
+		html+="<img align=left src="+more_place.icon+">";
+	}
+	html+=more_place.name;
+	html+="<br>";
+	html+=more_place.formatted_phone_number;
+	html+="<br>";
+	if(more_place.rating == undefined){
+		rate="no rate";
+	}else{
+		rate=more_place.rating;
+	}
+	html+="Rate:"+rate;
+	html+="<br>";
+	var memo = localStorage.getItem(more_place.id);
+	if(memo != null){
+		html+=memo;
+		html+="<br>";
+	}
+	var pll = sessionStorage.getItem(ll[more_place.id]);
+	if(more_place.url != ''){
+		html+="[<a href='"+more_place.url+"' target='_blank'>more</a>]";
+	}
+	html+="[<a href='javascript:memobox();'>memo</a>]";
+	html+="[<a href='javascript:stview("+pll+");'>view</a>] ";
+	html+="[<a href='javascript:directions("+pll+");'>direction</a>] ";
+
+	infowindow = new google.maps.InfoWindow();
+	if (currentInfoWindow) {
+		currentInfoWindow.close();
+	}
+
+	infowindow.setContent(html);
+	infowindow.open(map, marker);
+	currentInfoWindow = infowindow;
+	document.getElementById("pid").value=more_place.id;
+}
+
+
+function clearOverlays() {
+	for (i in markersArray) {
+		markersArray[i].setMap(null);
+	}
+	markersArray=[];
+}
+function memobox(){
+	document.getElementById("memoTxt").value='';
+	document.getElementById("textareas").style.visibility = "visible";
+	var item=localStorage.getItem(document.getElementById("pid").value);
+	if(item != null){
+		document.getElementById("memoTxt").value=item;
+	}
+}
+function createMemo(){
+	var memo = document.getElementById("memoTxt").value;
+	var pid = document.getElementById("pid").value;
+	localStorage.setItem(pid,memo);
+	alert('Save OK');
+	clsBox();
+	getData();
+}
+function clsBox(){
+	document.getElementById("memoTxt").value='';
+	document.getElementById("pid").value='';
+	document.getElementById("textareas").style.visibility = "hidden";
+}
+function addressJump(adrs){
+	var gc = new google.maps.Geocoder();
+	gc.geocode({ address : adrs }, function(results, status){
+		if (status == google.maps.GeocoderStatus.OK) {
+			map.setCenter(results[0].geometry.location);
+		}
+	});
+}
+function stview(lat,lng){
+	document.getElementById("streetview").innerHTML = '';
+	var svp = new google.maps.StreetViewPanorama(
+		document.getElementById("streetview"), {
+			position : new google.maps.LatLng(lat,lng)
+		}
+	);
+	if(svp.getVisible()){
+		map.setStreetView(svp);
+	}else{
+		document.getElementById("streetview").innerHTML = '';
+		document.getElementById("streetview").style.backgroundColor = 'white';
+	}
+}
+function directions(lat,lng){
+	alert('中心地点からの道順を表示します');
+	map.setZoom(16);
+	var rendererOptions =	{
+		draggable: true,
+		preserveViewport:true
+	};
+	var directionsRenderer = new google.maps.DirectionsRenderer(rendererOptions);
+	directionsRenderer.setOptions({
+	//		suppressMarkers: true
+	});
+	directionsRenderer.setMap(map);
+	var point1 = new google.maps.LatLng(map.getCenter().lat(),map.getCenter().lng());
+	var point2 = new google.maps.LatLng(lat,lng);
+
+	var request = {
+			origin: point1,
+			destination: point2,
+			travelMode: google.maps.DirectionsTravelMode.WALKING
+	};
+
+	var directionsService = new google.maps.DirectionsService();
+	directionsService.route(request, function(result, status)
+	{
+		if (status == google.maps.DirectionsStatus.OK) {
+			directionsRenderer.setDirections(result);
+		}
+	});
+	cmarker = new google.maps.Marker({
+		position: point2,
+		map: map,
+		icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=消|ff00ff|000000',
+		title:"(route delete)",
+		draggable:true,
+		animation: google.maps.Animation.DROP
+	});
+
+	google.maps.event.addListener(cmarker, "click", function() {
+		directionsRenderer.setMap(null);
+		cmarker.setMap(null);
+	});
+}
+
+google.maps.event.addDomListener(window,"load",initialize);
+</script>
+<style type="text/css" />
+body {
+	background-color : white;
+}
+#gmap {
+	position : absolute;
+	left : 0px;
+	top: 0px;
+	width: 100%;
+	height:100%;
+}
+#getbtn {
+	position : absolute;
+	left : 5px;
+	top: 100px;
+}
+#textareas {
+	position : absolute;
+	left : 100px;
+	top: 200px;
+}
+#geobtn {
+	position : absolute;
+	left : 5px;
+	top: 140px;
+}
+#streetview {
+	position : absolute;
+	left : 0px;
+	top: 250px;
+	width: 320px;
+	height:300px;
+}
+
+</style>
+</head>
+<body>
+<div id="gmap"></div> 
+<div id="getbtn"></div> 
+<div id="textareas"></div> 
+<div id="geobtn"></div> 
+<div id="streetview"></div> 
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<title>4-2-1sample2</title>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script> 
+<script type="text/javascript">
+function initialize(){
+	map = new google.maps.Map(
+		document.getElementById("gmap"),{
+			zoom : 14,
+			center : new google.maps.LatLng(35.68916, 139.70083),
+			mapTypeControlOptions : {
+			       style : google.maps.MapTypeControlStyle.DROPDOWN_MENU
+			},
+			navigationControlOptions : {
+				style : google.maps.NavigationControlStyle.SMALL
+			},
+			scaleControl:true,
+			scaleControlOptions : {
+			       style : google.maps.ScaleControlStyle.DEFAULT
+			},
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		}
+	);
+	if(navigator.geolocation){
+		var cnt=0;
+		var acc;
+//ÇPÅFåJÇËï‘Çµà íuÇéÊìæÇ∑ÇÈ
+		watchID=navigator.geolocation.watchPosition(function(pos){
+			var lat = pos.coords.latitude;
+			var lng = pos.coords.longitude;
+			var alt = pos.coords.altitude;
+			acc = pos.coords.accuracy;
+			var altacc=pos.coords.altitudeAccuracy;
+			var head = pos.coords.heading;
+			cnt=cnt+1;
+			var st = 'lat:'+lat+'<br> lng:'+lng+'<br> alt:'+alt+'<br> acc:'+acc+'<br> altacc:'+altacc+'<br> head:'+head+'<br> cnt:'+cnt;
+			document.getElementById("status").innerHTML = st;
+//ÇQÅFèåèÇñûÇΩÇµÇΩÇÁà íuéÊìæÇé~ÇﬂÇÈ
+			if(acc < 80 || cnt > 5){
+				navigator.geolocation.clearWatch(watchID);
+				alert('done \n acc:'+acc+'\n cnt:'+cnt+'');
+			}
+			var currentPos = new google.maps.LatLng(lat, lng);
+			map.setCenter(currentPos);
+		},function(error){alert('error:'+error.code);},
+		{enableHighAccuracy:false,timeout:8000,maximumAge:0});
+	}
+	setTimeout(scrollTo, 100, 0, 1);
+}
+google.maps.event.addDomListener(window,"load",initialize);
+</script>
+<style type="text/css" />
+#gmap {
+	position : absolute;
+	width:50%;	height:50%;
+}
+#status {
+	position : absolute;
+	left : 0px;	top: 200px;
+}
+</style>
+</head>
+<body>
+<div id="gmap"></div> 
+<div id="status"></div> 
+</body>
+</html>

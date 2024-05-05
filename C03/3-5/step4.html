@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<!-- 有償版は URLに &client=gme-xxxx を追加 -->
+	<script src="http://maps.googleapis.com/maps/api/js?v=3&sensor=false" type="text/javascript"></script>
+	<script type="text/javascript">
+	function initialize() {
+
+		var centerPos = new google.maps.LatLng(35.681382, 139.766084);
+		var mapDiv = document.getElementById('map_canvas');
+		mapDiv.style.width = "500px";
+		mapDiv.style.height = "500px";
+		var map = new google.maps.Map(mapDiv, {
+			center: centerPos,
+			zoom: 8,
+			mapTypeId: 'roadmap'
+		});
+ 
+		var layer = new google.maps.FusionTablesLayer({
+			query: {
+				select: 'address',	 // [Step1A]を利用した場合は"latitude"にする
+				from: '1720960'			 //ここをfusion tablesのtableIDにする
+			}
+		});
+		layer.setMap(map);
+	}
+	</script>
+</head>
+<body onload="initialize()">
+	<div id="map_canvas"></div>
+</body>
+</html>

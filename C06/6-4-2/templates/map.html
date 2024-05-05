@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Maps JavaScript API v3 Example: Map Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+    <style type="text/css">
+      html, body, #map_canvas {width: 100%; height: 100%; margin:0; padding: 0}
+    </style>
+    <script type="text/javascript">
+      var mapCanvas, currentPos, currentPosMarker, circle;
+      var places = new google.maps.MVCArray();
+      var infoWnd = new google.maps.InfoWindow();
+      function initialize() {
+        /*
+         * (1)地図の表示
+         */
+        currentPos = new google.maps.LatLng(35.658517, 139.701334); //初期値は渋谷駅
+        var mapOptions = {
+          zoom: 15,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          center: currentPos
+        };
+        mapCanvas = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+        
+        //現在位置を示すマーカー(currentPosMarker)
+        currentPosMarker = new google.maps.Marker({
+          position : currentPos
+        });
+        
+        //(2)[検索ボタン]が押されたら、showMapCurrentLocationを実行
+        google.maps.event.addDomListener(document.getElementById("searchBtn"), 'click', showMapCurrentLocation);
+      }
+      function showMapCurrentLocation(){
+        /*
+         * (2)Geolocation APIで現在地を特定する
+         */
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            currentPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            mapCanvas.setCenter(currentPos);
+            currentPosMarker.setPosition(currentPos);
+            currentPosMarker.setMap(mapCanvas);
+            
+            /*
+             * (3)現在位置を中心にサーバーに周辺施設の検索を依頼する
+             * サーバー側の『(4)現在位置のパラメータを元に施設を検索する』を実行する
+             */
+            //古い検索情報を削除
+            places.forEach(function(marker){
+              marker.setMap(null);
+              delete marker;
+            });
+            places.clear();
+            
+            //新しい検索情報を表示
+            var seeachParams = {
+              "latlng" : currentPos.toUrlValue(),
+              "radius" : 1000 //1km
+            };
+            $.getJSON("/proximity", seeachParams, function(json){
+              /*
+               * (4)周辺施設が見つかったら、地図上に表示する
+               */
+              if (json.length) {
+                //見つかったときはマーカーを表示
+                var place, marker;
+                bounds = new google.maps.LatLngBounds(currentPos);
+                for(var i in json) {
+                  marker = createMarker(json[i]);
+                  places.push(marker);
+                  bounds.extend(marker.getPosition());
+                }
+                mapCanvas.fitBounds(bounds);
+              } else {
+                alert("見つかりませんでした");
+              }
+            });
+          }, function() {
+            alert("現在位置が取得できません");
+          });
+        } else {
+           alert("Geolocationの機能が利用できません");
+        }
+      }
+      function createMarker(placeInfo){
+        /*
+         * 周辺施設のマーカーを作成
+         */
+        var marker = new google.maps.Marker({
+          position : new google.maps.LatLng(placeInfo.lat, placeInfo.lng),
+          map : mapCanvas,
+          icon : "https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=civic-building|FFFF00"
+        });
+        google.maps.event.addListener(marker, "click", function(){
+          var html = "<b>" + placeInfo.name + "</b>";
+          infoWnd.setContent(html);
+          infoWnd.open(mapCanvas, marker);
+        });
+        return marker;
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <input type="button" id="searchBtn" value="現在値から1km圏内の図書館を検索" />
+    <div id="map_canvas"></div>
+  </body>
+</html>

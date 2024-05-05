@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script src="http://maps.google.com/maps?file=api&v=2" type="text/javascript"></script>
+	<script type="text/javascript">
+		function initialize() {
+			//地図を表示
+			var latlng = new GLatLng(35.681382, 139.766084);
+			var mapDiv = document.getElementById("map_canvas");
+			var mapCanvas = new GMap2(mapDiv);
+			mapCanvas.setCenter(latlng, 15, G_NORMAL_MAP);
+			
+			GEvent.addListener(mapCanvas, "addoverlay", function(overlay) {
+				if (overlay.__proto__ == GMarker.prototype) {
+					var latlng = overlay.getLatLng();
+					mapCanvas.openInfoWindow(latlng, latlng.toUrlValue(4));
+				}
+			});
+			
+			GEvent.addListener(mapCanvas, "click", function(overlay, latlng) {
+				if (overlay == null) {
+					var marker = new GMarker(latlng);
+					mapCanvas.addOverlay(marker);
+				}
+			});
+			
+		}
+		window.onload = initialize;
+		window.onunload = GUnload;
+	</script>
+</head>
+<body>
+	<div id="map_canvas"></div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<title>範囲内にある場所を表示</title>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		var map;
+		var ftLayer = null;
+		var	fID = 1488591;	// 緯度経度が入ったテーブルID
+		window.addEventListener("load", function(){
+			map = new google.maps.Map(document.getElementById("gmap"));
+			map.setOptions({
+				zoom : 14,
+				center : new google.maps.LatLng(35.681382, 139.766084),
+				mapTypeId : google.maps.MapTypeId.ROADMAP
+			});
+			// イベント割り当て
+			document.getElementById("drawMarker").addEventListener("click", function(){
+				if (ftLayer){ ftLayer.setMap(null); }	// Fusion Tablesレイヤーを削除
+				var r = document.getElementById("radius").value;
+				var qstr = "SELECT * FROM "+fID+" WHERE ST_INTERSECTS(coords, CIRCLE(LATLNG(35.681382, 139.766084), "+r+"))";
+				ftLayer = new google.maps.FusionTablesLayer(fID);
+				ftLayer.setQuery(qstr);
+				ftLayer.setMap(map);
+			}, false);
+		}, false);
+	</script>
+	</head>
+	<body>
+		<div id="gmap" style="width: 500px; height: 400px"></div>
+		<form>
+			半径：<input type="text" value="1000" id="radius" size="8">
+			<input type="button" id="drawMarker" value="表示">
+		</form>
+	</body>
+</html>

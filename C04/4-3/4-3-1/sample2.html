@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+function initialize(){
+	map = new google.maps.Map(
+				document.getElementById("map"),{
+					zoom : 14,
+					center : new google.maps.LatLng(35.68916, 139.70083),
+					mapTypeControlOptions : {
+					       style : google.maps.MapTypeControlStyle.DROPDOWN_MENU
+					},
+					navigationControlOptions : {
+					       style : google.maps.NavigationControlStyle.SMALL
+					},
+					scaleControl:true,
+					scaleControlOptions : {
+					       style : google.maps.ScaleControlStyle.DEFAULT
+					},
+					mapTypeId : google.maps.MapTypeId.ROADMAP
+				}
+	);
+//çÇÇ≥Çí≤êﬂÇ∑ÇÈ
+	var hh = ($(document).height() -100);
+	$("#map").css("height",hh);
+}
+$('#maps').live('pageshow',initialize);
+</script>
+<style type="text/css" />
+</style>
+<title>JQM_Sample</title>
+</head>
+<body>
+<div data-role="page" id="menu" data-theme="e">
+	<div data-role="header" data-theme="e">
+	<h1>Header</h1>
+	</div>
+	<div data-role="content" data-theme="e">
+		<ul data-role="listview" data-inset="true">
+		<li data-role="list-divider" data-theme="e">Menu</li>
+		<li><a href="#page1" data-transition="slideup"><h3>page1</h3></a></li>
+		<li><a href="#maps" data-transition="slide"><h3>Maps with geolocation</h3></a></li>
+		<li><a href="#page3" data-transition="slidedown"><h3>page3</h3></a></li>
+		<li><a href="#page4" data-transition="pop"><h3>page4</h3></a></li>
+		</ul>
+	</div>
+	<div data-role="footer" data-theme="e">
+	<h3>Footer</h3>
+	</div>
+</div>
+
+<div data-role="page" id="page1" data-add-back-btn="true" data-back-btn-text="ñﬂÇÈ">
+	<div data-role="header">
+	<h1>Page1_Header</h1>
+	</div>
+	<div data-role="content">
+		contents2
+	</div>
+</div>
+<div data-role="page" id="maps" data-add-back-btn="true" data-back-btn-text="ñﬂÇÈ">
+	<div data-role="header">
+	<h1>map_Header</h1>
+	</div>
+	<div data-role="content">
+		<div id="map" class="ui-shadow"></div>
+		
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<title>ポリゴンで都道府県</title>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		var map;
+		window.addEventListener("load", function(){
+			map = new google.maps.Map(document.getElementById("gmap"));
+			map.setOptions({
+				zoom : 5,
+				center : new google.maps.LatLng(36.681382, 138.766084),
+				mapTypeId : google.maps.MapTypeId.ROADMAP
+			});
+			// イベント割り当て
+			document.getElementById("prefectures").addEventListener("change", function(){
+				var filename = this.value;
+				var baseURL = "http://www.openspc2.org/test3/KML/";
+				var t = (new Date()).getTime();	// KMLキャッシュしない（処理速度は低下する）
+				var k = new google.maps.KmlLayer(baseURL+filename+"?t="+t, {
+					map: map,
+					preserveViewport : true	// これを設定しないと自動ズーム＆調整される
+				});
+			}, false);
+		}, false);
+	</script>
+	</head>
+	<body>
+		<div id="gmap" style="width: 500px; height: 400px"></div>
+		<form>
+			<select id="prefectures">
+				<option value="hokkaido.kml">北海道</option>
+				<option value="aomori.kml">青森県</option>
+				<option value="akita.kml">秋田県</option>
+				<option value="iwate.kml">岩手県</option>
+				<option value="yamagata.kml">山形県</option>
+				<option value="miyagi.kml">宮城県</option>
+				<option value="fukushima.kml">福島県</option>
+				<option value="niigata.kml">新潟県</option>
+				<option value="tochigi.kml">栃木県</option>
+				<option value="ibaraki.kml">茨城県</option>
+				<option value="gunma.kml">群馬県</option>
+				<option value="chiba.kml">千葉県</option>
+				<option value="kanagawa.kml">神奈川県</option>
+				<option value="tokyo.kml">東京都</option>
+				<option value="saitama.kml">埼玉県</option>
+				<option value="nagano.kml">長野県</option>
+				<option value="shizuoka.kml">静岡県</option>
+				<option value="yamanashi.kml">山梨県</option>
+				<option value="toyama.kml">富山県</option>
+				<option value="gifu.kml">岐阜県</option>
+				<option value="ishikawa.kml">石川県</option>
+				<option value="fukui.kml">福井県</option>
+				<option value="aichi.kml">愛知県</option>
+				<option value="mie.kml">三重県</option>
+				<option value="shiga.kml">滋賀県</option>
+				<option value="kyoto.kml">京都府</option>
+				<option value="nara.kml">奈良県</option>
+				<option value="wakayama.kml">和歌山県</option>
+				<option value="osaka.kml">大阪府</option>
+				<option value="hyougo.kml">兵庫県</option>
+				<option value="tottori.kml">鳥取県</option>
+				<option value="okayama.kml">岡山県</option>
+				<option value="hiroshima.kml">広島県</option>
+				<option value="shimane.kml">島根県</option>
+				<option value="yamaguchi.kml">山口県</option>
+				<option value="kagawa.kml">香川県</option>
+				<option value="tokushima.kml">徳島県</option>
+				<option value="kouchi.kml">高知県</option>
+				<option value="ehime.kml">愛媛県</option>
+				<option value="ooita.kml">大分県</option>
+				<option value="miyazaki.kml">宮崎県</option>
+				<option value="fukuoka.kml">福岡県</option>
+				<option value="saga.kml">佐賀県</option>
+				<option value="kagoshima.kml">鹿児島県</option>
+				<option value="nagasaki.kml">長崎県</option>
+				<option value="kumamoto.kml">熊本県</option>
+				<option value="okinawa.kml">沖縄県</option>
+			</select>
+		</form>
+	</body>
+</html>

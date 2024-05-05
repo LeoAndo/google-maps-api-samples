@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+	<script type="text/javascript">
+		var mapCanvas, streetviewCanvas;
+		function initialize() {
+			var latlng = new google.maps.LatLng(35.681905, 139.763552);
+			var streetviewDiv = document.getElementById("streetview_canvas");
+			streetviewDiv.style.height = "50%";
+			streetviewDiv.style.width = "100%";
+			streetviewCanvas =  new google.maps.StreetViewPanorama(streetviewDiv, {
+				position : latlng
+			});
+
+			var mapOpts = {
+				zoom: 15,
+				center: latlng,
+				mapTypeId:  google.maps.MapTypeId.ROADMAP,
+				streetView : streetviewCanvas
+			};
+			
+			var mapDiv = document.getElementById("map_canvas");
+			mapCanvas = new google.maps.Map(mapDiv, mapOpts);
+			mapDiv.style.height = "50%";
+			mapDiv.style.width = "100%";
+
+			if (androidClient !== undefined) {
+				setInterval(function(){
+					var povOrg = streetviewCanvas.getPov();
+					var pov = window.androidClient.getPov();
+					if (pov !== "") {
+						pov = pov.split(",");
+						pov[0] = parseInt(pov[0]);
+						pov[1] = parseInt(pov[1]);
+						pov[1] = -pov[1] - 90;
+						streetviewCanvas.setPov({
+							heading : pov[0],
+							pitch : pov[1],
+							zoom : povOrg.zoom
+						});
+					}
+				}, 250);
+			}
+		}
+		window.onload = initialize;
+	</script>
+</head>
+<body >
+	<div id="map_canvas"></div>
+	<div id="streetview_canvas"></div>
+</body>
+</html>

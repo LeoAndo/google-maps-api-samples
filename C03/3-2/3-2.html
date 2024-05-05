@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&v=3.4"></script>
+	<script type="text/javascript">
+		function initialize() {
+			var latlng = new google.maps.LatLng(35.661382, 139.766084);
+			var mapOpts = {
+				zoom: 13,
+				center: latlng,
+				mapTypeId:  google.maps.MapTypeId.ROADMAP,
+				mapTypeControlOptions: {
+					mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'highwayMap']
+				}
+			};
+			var mapDiv = document.getElementById("map_canvas");
+			var mapCanvas = new google.maps.Map(mapDiv, mapOpts);
+			
+			var highwayMapStyles = [
+				{
+					featureType: "transit",
+					elementType: "all",
+					stylers: [
+						{ visibility: "off" }
+					]
+				},{
+					featureType: "road.local",
+					elementType: "all",
+					stylers: [
+						{ visibility: "off" }
+					]
+				},{
+					featureType: "road.arterial",
+					elementType: "all",
+					stylers: [
+						{ visibility: "off" }
+					]
+				}
+			];
+			var styledMapOptions = {
+				name: "Highway"
+			};
+
+			var highwayMapType = new google.maps.StyledMapType(highwayMapStyles, styledMapOptions);
+
+			mapCanvas.mapTypes.set('highwayMap', highwayMapType);
+			mapCanvas.setMapTypeId('highwayMap');
+		}
+		window.onload = initialize;
+	</script>
+</head>
+<body>
+	<div id="map_canvas"></div>
+</body>
+</html>

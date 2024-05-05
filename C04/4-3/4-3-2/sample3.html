@@ -1,0 +1,202 @@
+<!DOCTYPE html> 
+<html lang="ja"> 
+<head>
+<title>4-3-2sample3</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=true&libraries=places" type="text/javascript"></script>
+<script>
+function initialize() {
+	var acc;
+	var age;
+	var timeout;
+  map = new google.maps.Map(document.getElementById('map'), {
+		center : new google.maps.LatLng(35.68916, 139.70083),
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    zoom: 15
+  });
+	if(navigator.geolocation){
+		opt = strLoad();//LocalStorageに保存した設定を取得(1)
+		navigator.geolocation.getCurrentPosition(function(pos){
+			var lat = pos.coords.latitude;
+			var lng = pos.coords.longitude;
+			var currentPos = new google.maps.LatLng(lat, lng);
+			map.setCenter(currentPos);
+		},
+		function(error){},
+		opt
+		);
+	}
+	var hh = ($(document).height()-70);
+	$("#map").css("height",hh);
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+
+function strSave(){//ローカルストレージに値を保存(2)
+	var age = $("#age").val();
+	var acc = $("#acc").val();
+	var timeout = $("#timeout").val();
+	var acc_save = {
+		age:age,
+		acc:acc,
+		timeout:timeout
+	}
+	localStorage.setItem('acc_save',JSON.stringify(acc_save));
+	alert('age='+age+'\r acc='+acc+'\r timeout='+timeout);
+}
+function strLoad(){//ローカルストレージから値を取得(3)
+	var acc_save = JSON.parse(localStorage.getItem('acc_save'));
+	if(acc_save == null){
+		acc=false;
+		age=0;
+		timeout=8*1000;
+	}else{
+		acc=acc_save.acc;
+		age=acc_save.age;
+		timeout=acc_save.timeout;
+	}
+	alert('age='+age+'\r acc='+acc+'\r timeout='+timeout);
+	return {enableHighAccuracy:acc,timeout:timeout,maximumAge:age};
+}
+function strRefresh(){//コントロールに現在の設定値を反映(4)
+	var acc_save = JSON.parse(localStorage.getItem('acc_save'));
+	acc=acc_save.acc;
+	age=acc_save.age;
+	timeout=acc_save.timeout;
+	$("#age").val(age).slider("refresh");
+	$("#timeout").val(timeout).slider("refresh");
+	$("#acc").val(acc).slider("refresh");
+	alert('age='+age+'\r acc='+acc+'\r timeout='+timeout);
+}
+$('#set').live('pageshow',strRefresh);
+
+</script>
+</head>
+<body>
+<div data-role="page" id="first">
+	<div id="map" data-role="content"></div>
+	<div data-role="footer" data-position="fixed" data-id="persist" data-theme="c"> 
+	<div data-role="navbar"> 
+		<ul data-theme="c">
+		<li>
+		<div data-role="button">
+		<div class="ui-select ui-btn-inner">
+			<select tabindex="-1" name="pref" id="pref" data-native-menu="false">
+			<option>都道府県</option>
+
+		<optgroup label="北海道">
+			<option value="北海道">北海道</option>
+		</optgroup>
+		<optgroup label="東北">
+			<option value="青森県">青森県</option>
+			<option value="岩手県">岩手県</option>
+			<option value="宮城県">宮城県</option>
+			<option value="秋田県">秋田県</option>
+			<option value="山形県">山形県</option>
+
+			<option value="福島県">福島県</option>
+		</optgroup>
+		<optgroup label="関東">
+			<option value="茨城県">茨城県</option>
+			<option value="栃木県">栃木県</option>
+			<option value="群馬県">群馬県</option>
+			<option value="埼玉県">埼玉県</option>
+
+			<option value="千葉県">千葉県</option>
+			<option value="東京都">東京都</option>
+			<option value="神奈川県">神奈川県</option>
+		</optgroup>
+		<optgroup label="中部">
+			<option value="新潟県">新潟県</option>
+			<option value="富山県">富山県</option>
+
+			<option value="石川県">石川県</option>
+			<option value="福井県">福井県</option>
+			<option value="山梨県">山梨県</option>
+			<option value="長野県">長野県</option>
+			<option value="岐阜県">岐阜県</option>
+			<option value="静岡県">静岡県</option>
+
+			<option value="愛知県">愛知県</option>
+		</optgroup>
+		<optgroup label="近畿">
+			<option value="三重県">三重県</option>
+			<option value="滋賀県">滋賀県</option>
+			<option value="京都府">京都府</option>
+			<option value="大阪府">大阪府</option>
+
+			<option value="兵庫県">兵庫県</option>
+			<option value="奈良県">奈良県</option> 
+			<option value="和歌山県">和歌山県</option>
+		</optgroup>
+		<optgroup label="中国">
+			<option value="鳥取県">鳥取県</option>
+			<option value="島根県">島根県</option>
+
+			<option value="岡山県">岡山県</option>
+			<option value="広島県">広島県</option>
+			<option value="山口県">山口県</option>
+		</optgroup>
+		<optgroup label="四国">
+			<option value="徳島県">徳島県</option>
+			<option value="香川県">香川県</option>
+
+			<option value="愛媛県">愛媛県</option>
+			<option value="高知県">高知県</option>
+		</optgroup>
+		<optgroup label="九州">
+			<option value="福岡県">福岡県</option>
+			<option value="佐賀県">佐賀県</option>
+			<option value="長崎県">長崎県</option>
+
+			<option value="熊本県">熊本県</option>
+			<option value="大分県">大分県</option>
+			<option value="宮崎県">宮崎県</option>
+			<option value="鹿児島県">鹿児島県</option>
+		</optgroup>
+		<optgroup label="沖縄">
+			<option value="沖縄県">沖縄県</option>
+		</optgroup>
+			</select>
+		</div>
+		</div>
+	</li>
+	<li><a data-role="button" data-icon="gear" id=mtp>表示切替</a></li>
+	<li><a href="#set" data-role="button" data-icon="gear" data-rel="dialog" data-transition="pop">設定</a></li>
+	</ul> 
+	</div> 
+	</div>
+</div>
+<div data-role="page" id="set" data-fullscreen="true">
+	<div data-role="header" data-theme="e">
+		<h1>Accuracy setting</h1>
+	</div>
+<!--//(5)コントロールするUIを作成 -->
+	<div data-role="content" data-theme="e">	
+		<h2>Accuracy setting</h2>
+		<div data-role="fieldcontain">
+			<label for="age">maximumAge:(msec)</label>
+		 	<input type="range" name="age" id="age" value="0" min="0" max="20000" data-theme="b" />
+			<br>
+			<label for="acc">enableHighAccuracy:</label>
+			<select name="acc" id="acc" data-role="slider">
+				<option value="false">Off</option>
+				<option value="true">On</option>
+			</select>
+			<br>
+			<label for="timeout">timeout:(msec)</label>
+		 	<input type="range" name="timeout" id="timeout" value="8000" min="0" max="60000" data-theme="a" />
+			<br><a onClick="strSave();" data-role="button" data-inline="true" data-icon="star">Save</a>
+			  <a data-rel="back" data-role="button" data-inline="true" data-icon="back">Back</a>
+		</div>
+	</div><!-- /content -->
+	
+	<div data-role="footer" data-theme="e">
+		<h4><input type=button value=test onClick="strRefresh()"></h4>
+	</div><!-- /footer -->
+</div><!-- /page popup -->
+</body>
+</html>

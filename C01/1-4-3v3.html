@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&v=3"></script>
+	<script type="text/javascript">
+		function initialize() {
+			//地図を表示
+			var latlng = new google.maps.LatLng(35.681382, 139.766084);
+			var mapOpts = {
+				zoom: 15,
+				center: latlng,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			var mapDiv = document.getElementById("map_canvas");
+			var mapCanvas = new google.maps.Map(mapDiv, mapOpts);
+			
+			var info = new google.maps.InfoWindow({
+				content : "地図をドラッグ＆ドロップしてください"
+			});
+			info.open(mapCanvas);
+			info.bindTo("position", mapCanvas, "center");
+			info.position_changed = function() {
+				info.setContent(info.get("position").toUrlValue(4));
+			};
+		}
+		window.onload = initialize;
+	</script>
+</head>
+<body>
+	<div id="map_canvas"></div>
+</body>
+</html>

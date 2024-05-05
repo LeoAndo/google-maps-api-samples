@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<title>ポリゴンで都道府県(Fusion Tables)</title>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script>
+		var map;
+		window.addEventListener("load", function(){
+			map = new google.maps.Map(document.getElementById("gmap"));
+			map.setOptions({
+				zoom : 4,
+				center : new google.maps.LatLng(36.681382, 138.766084),
+				mapTypeId : google.maps.MapTypeId.ROADMAP
+			});
+			// イベント割り当て
+			document.getElementById("prefectures").addEventListener("change", function(){
+				var filename = this.value;
+				fID = this.value;
+				var k = new google.maps.FusionTablesLayer(fID, {
+					map: map
+				});
+				google.maps.event.addListener(k, "click", function(evt){
+					this.setMap(null);	// クリックしたらポリゴンを消去
+				});
+			}, false);
+		}, false);
+	</script>
+	</head>
+	<body>
+		<div id="gmap" style="width: 500px; height: 400px"></div>
+		<form>
+			<select id="prefectures">
+				<option value="1468692">北海道</option>
+				<option value="1468684">青森県</option>
+				<option value="1468683">秋田県</option>
+				<option value="1468980">岩手県</option>
+				<option value="1471723">山形県</option>
+				<option value="1471005">宮城県</option>
+				<option value="1468687">福島県</option>
+				<option value="1468989">新潟県</option>
+				<option value="1471809">栃木県</option>
+				<option value="1470701">茨城県</option>
+				<option value="1469089">群馬県</option>
+				<option value="1468978">千葉県</option>
+				<option value="1469093">神奈川県</option>
+				<option value="1471622">東京都</option>
+				<option value="1468986">埼玉県</option>
+				<option value="1468985">長野県</option>
+				<option value="1470826">静岡県</option>
+				<option value="1471904">山梨県</option>
+				<option value="1471900">富山県</option>
+				<option value="1468898">岐阜県</option>
+				<option value="1469091">石川県</option>
+				<option value="1468778">福井県</option>
+				<option value="1461631">愛知県</option>
+				<option value="1469094">三重県</option>
+				<option value="1471716">滋賀県</option>
+				<option value="1470704">京都府</option>
+				<option value="1468698">奈良県</option>
+				<option value="1471721">和歌山県</option>
+				<option value="1471619">大阪府</option>
+				<option value="1468693">兵庫県</option>
+				<option value="1471813">鳥取県</option>
+				<option value="1471202">岡山県</option>
+				<option value="1468979">広島県</option>
+				<option value="1471807">島根県</option>
+				<option value="1471903">山口県</option>
+				<option value="1468694">香川県</option>
+				<option value="1471717">徳島県</option>
+				<option value="1468982">高知県</option>
+				<option value="1469086">愛媛県</option>
+				<option value="1471800">大分県</option>
+				<option value="1470824">宮崎県</option>
+				<option value="1468686">福岡県</option>
+				<option value="1470713">佐賀県</option>
+				<option value="1469092">鹿児島県</option>
+				<option value="1470707">長崎県</option>
+				<option value="1468983">熊本県</option>
+				<option value="1469098">沖縄県</option>
+			</select>
+		</form>
+	</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<title>4-2-4sample</title>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true&libraries=places"></script>
+<script type="text/javascript">
+var markersArray= new Array();
+var map;
+var infowindow;
+var currentInfoWindow = null;
+
+function initialize(){//地図表示と現在位置取得
+	map = new google.maps.Map(
+		document.getElementById("gmap"),{
+			zoom : 14,
+			center : new google.maps.LatLng(35.68916, 139.70083),
+			mapTypeControlOptions : {
+			       style : google.maps.MapTypeControlStyle.DROPDOWN_MENU
+			},
+			navigationControlOptions : {
+				style : google.maps.NavigationControlStyle.SMALL
+			},
+			scaleControl:true,
+			scaleControlOptions : {
+			       style : google.maps.ScaleControlStyle.DEFAULT
+			},
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		}
+	);
+	//位置情報を取得する
+	if(navigator.geolocation){//1
+		navigator.geolocation.getCurrentPosition(function(pos){
+			var lat = pos.coords.latitude;
+			var lng = pos.coords.longitude;
+			var currentPos = new google.maps.LatLng(lat, lng);
+			map.setCenter(currentPos);
+		},
+		function(error){alert('error:'+error.code);},
+		{enableHighAccuracy:false,timeout:8000,maximumAge:0}
+		);
+	}
+	//アドレスバーを隠す
+	setTimeout(scrollTo, 100, 0, 1);
+
+}
+function getData(){//データ取得
+	clearOverlays();
+	var request = {
+		location: map.getCenter(),
+		radius: 1000,
+		types: ['store']
+	};
+	infowindow = new google.maps.InfoWindow();
+	if (currentInfoWindow) {
+		currentInfoWindow.close();
+	}
+	var service = new google.maps.places.PlacesService(map);//3
+	service.search(request, callback);
+}
+
+function callback(results, status) {//PlacesAPIから店情報を取得
+  if (status == google.maps.places.PlacesServiceStatus.OK) {
+    for (var i = 0; i < results.length; i++) {
+      createMarker(results[i]);
+    }
+  }
+}
+
+function createMarker(place) {//マーカーを生成
+	var item=localStorage.getItem(place.id);//(1)
+	if(item == null){
+		anim = google.maps.Animation.DROP
+	}else{//すでにメモが登録されていればマーカーを跳ねさせる
+		anim = google.maps.Animation.BOUNCE
+	}
+
+  var placeLoc = place.geometry.location;
+  var marker = new google.maps.Marker({
+    map: map,
+		draggable:true,
+		title:place.name,
+		animation: anim,
+		position: place.geometry.location
+	});
+
+  google.maps.event.addListener(marker, 'click', function() {//(2)
+		clsBox();
+		var request = {
+		  reference: place.reference
+		};
+		var more_place = JSON.parse(sessionStorage.getItem(place.id));//(4)
+		if(more_place == null){
+			alert("net");
+			//SessionStorageにデータがなければ再度PlacesAPIを呼び出す
+			service = new google.maps.places.PlacesService(map);
+			service.getDetails(request, function(more_place,status){
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+					sessionStorage.setItem(place.id,JSON.stringify(more_place));//(3)
+					moreInfo(marker,more_place);
+				}
+			});
+		}else{
+			alert("session");
+			moreInfo(marker,more_place);
+		}
+	});
+	markersArray.push(marker);
+}
+
+function moreInfo(marker,more_place){
+	html="";
+	if(more_place.icon != ''){
+		html+="<img align=left src="+more_place.icon+">";//吹き出しにアイコンを表示
+	}
+	//お店の名前や電話番号を表示
+	html+=more_place.name;
+	html+="<br>";
+	html+=more_place.formatted_phone_number;
+	html+="<br>";
+	if(more_place.rating == undefined){
+		rate="no rate";
+	}else{
+		rate=more_place.rating;
+	}
+	html+="Rate:"+rate;
+	html+="<br>";
+	var memo = localStorage.getItem(more_place.id);
+	if(memo != null){
+		html+=memo;
+		html+="<br>";
+	}
+	if(more_place.url != ''){
+		html+="[<a href='"+more_place.url+"' target='_blank'>more</a>]";
+	}
+	html+="[<a href='javascript:memobox();'>memo</a>] ";
+	infowindow = new google.maps.InfoWindow();
+	if (currentInfoWindow) {
+		currentInfoWindow.close();
+	}
+	infowindow.setContent(html);
+	infowindow.open(map, marker);
+	currentInfoWindow = infowindow;
+	document.getElementById("pid").value=more_place.id;
+}
+
+function clearOverlays() {//マーカーを消去
+	for (i in markersArray) {
+		markersArray[i].setMap(null);
+	}
+	markersArray=[];
+}
+function memobox(){//メモのフォーム
+	document.getElementById("memoTxt").value='';
+	document.getElementById("textareas").style.visibility = "visible";
+	var item=localStorage.getItem(document.getElementById("pid").value);
+	if(item != null){
+		document.getElementById("memoTxt").value=item;
+	}
+}
+function createMemo(){//メモをLocalStorageに登録
+	var memo = document.getElementById("memoTxt").value;
+	var pid = document.getElementById("pid").value;
+	localStorage.setItem(pid,memo);
+	alert('Save OK');
+	clsBox();
+	getData();
+}
+function clsBox(){//メモの表示をクリア
+	document.getElementById("memoTxt").value='';
+	document.getElementById("pid").value='';
+	document.getElementById("textareas").style.visibility = "hidden";
+}
+google.maps.event.addDomListener(window,"load",initialize);
+window.onload = function(){
+	document.getElementById("getbtn").innerHTML = "<img src='btn.gif' id='getData'>";
+	document.getElementById("getData").addEventListener("click", getData,true);
+//add_memo
+	document.getElementById("textareas").innerHTML = "<input type=text id=memoTxt>";
+	document.getElementById("textareas").innerHTML += "<input type=hidden id='pid'>";
+	document.getElementById("textareas").innerHTML += "<input type=button onClick='createMemo();' value='Save'>";
+	document.getElementById("textareas").style.visibility = "hidden";
+}
+</script>
+<style type="text/css" />
+#gmap {position:absolute;width:100%;height:100%;}
+#getbtn {position:absolute;left:5px;top:250px;}
+#textareas {position:absolute;left:100px;top:310px;}
+</style>
+</head>
+<body>
+<div id="gmap"></div> 
+<div id="getbtn"></div> 
+<div id="textareas"></div> 
+</body>
+</html>
